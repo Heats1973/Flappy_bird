@@ -16,7 +16,7 @@ def audio_cb(indata, frame, time, status):
 
 init()
 window_size = 1280,720
-display.set_mode(window_size)
+window = display.set_mode(window_size)
 clock = time.Clock()
 
 player = Rect(150, window_size[1] // 2 -100, 100, 100)
@@ -33,7 +33,44 @@ def generate_pipes(count, pipe_width=140, gap = 280, min_height=50, max_height =
     return pipes
 
 
-while True:
+pies = generate_pipes(150)
+font1 = font.Font(None, 100)
+score = 0
+lose = False
+wait = 40
 
-    display.update()
-    clock.tick(60)
+y_val = 0.0
+gravity = 0.6
+TRESH = 0.001
+IMPULSE = -0.8
+with sd.InputStream(samplerate=fs, channels= 1, blocksize=block, callback=audio_cb):
+    while True:
+        for e in event.get():
+            if e.type == QUIT:
+                quit()
+
+        if mic_level > TRESH:
+            y_val = IMPULSE
+        y_val += gravity
+        player.y += int(y_val)
+
+        window.fill((0,0,160))
+        draw.rect(window, (240, 0, 0), player)
+
+        for pie in pies[:]:
+            if not lose:
+                pie.x -= 10
+            draw.rect(window, (0, 240,0), pie)
+            if pie.x < -100:
+                pies.remove(pie)
+                score += 0.5
+            if player.colliderect(pie):
+                lose = True
+        if len(pies) < 0:
+            pies += generate_pipes(150)
+
+        score_text = font1.render("Score: " + str(score), True, (255,255,255))
+        window.blit(score_text, (window_size[0] // 2 - score_text.get_rect().w//2, 40))
+
+        display.update()
+        clock.tick(60)
