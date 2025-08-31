@@ -66,7 +66,7 @@ with sd.InputStream(samplerate=fs, channels= 1, blocksize=block, callback=audio_
                 score += 0.5
             if player.colliderect(pie):
                 lose = True
-        if len(pies) < 0:
+        if len(pies) < 3:
             pies += generate_pipes(150)
 
         score_text = font1.render("Score: " + str(score), True, (255,255,255))
